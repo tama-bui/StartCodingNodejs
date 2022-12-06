@@ -16,7 +16,7 @@ export class Book {
     title!: string
 
     @Field(()=>Author)
-    @ManyToOne(()=> Author, author=>author.books)
+    @ManyToOne(()=> Author, author=>author.books, {onDelete:'CASCADE'}) //borra todas las relaciones con el author eliminado
     author!:number
 
     @Field()

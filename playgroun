@@ -1,0 +1,62 @@
+import { title } from "process"
+import { ID } from "type-graphql"
+
+//para buscar los libros de un autor
+query{
+    getAllBooks{
+        id
+        title
+        author{
+            id 
+            fullName
+            books{
+                id 
+                title
+            }
+        }
+    }
+}
+//crear crear un author
+mutation{
+    createAuthor(input:{fullName:"gabriel Garcia Marquez"})
+    {
+        id 
+        fullName
+    }
+}
+//para crear un librp 
+mutation{ 
+ createBook (input:{title:"book test", author:17})
+ {
+  id 
+  title
+  author{
+    books{
+        id
+    }
+  }
+} 
+}
+// traer un solo libro y todos los libros de ese author
+query{
+    getBookById(input:{id:22})
+    {id 
+     title
+     author{
+        id 
+        books{
+            id 
+            title
+        }
+     }}
+}
+
+//para eliminar un libro
+mutation{
+    deteleBook(bookId:{id:22})
+}
+
+//para eliminar un author
+mutation{
+    deteleOneAuthor(input:{id:22})
+}

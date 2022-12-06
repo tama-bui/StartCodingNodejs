@@ -1,7 +1,7 @@
 import { futimes } from 'fs';
 import { Mutation , Resolver, Arg, InputType, Field, Query, UseMiddleware, Ctx} from'type-graphql';
 import { getRepository, Repository } from 'typeorm';
-import { Author } from '../entity/author.entity';
+import { Author} from '../entity/author.entity';
 import { Book } from '../entity/book.entity';
 import { Length } from 'class-validator';
 import { IContext, isAuth } from '../middlewares/auth.middlewares';
@@ -70,7 +70,7 @@ export class BookResolver {
         author: author
       });
 
-      return await this.bookRepository.findOne(book.identifiers[0].id, { relations:['author']})
+      return await this.bookRepository.findOne(book.identifiers[0].id, { relations:['author', 'author.books']})
 
 
     }catch (e) {
@@ -80,7 +80,7 @@ export class BookResolver {
   @Query(()=> [Book])
  async getAllBooks(): Promise<Book[]>{
   try{
-    return await this.bookRepository.find({relations:['author']})
+    return await this.bookRepository.find({relations:['author', 'author.books']})
   } catch (e) {
     throw new Error (e)
   }
@@ -91,7 +91,7 @@ async getBookId(
   @Arg ('input', () => BookIdInput) input: BookIdInput
 ): Promise<Book | undefined> {
   try  {
-    const book = await this.bookRepository.findOne (input.id, { relations:['author']});
+    const book = await this.bookRepository.findOne (input.id, { relations:['author', 'author.books']});
     if (!book) {
       const error =new Error();
       error.message='Book not found';
@@ -120,8 +120,11 @@ async updateBookId (
     @Arg ("bookId", () => BookIdInput) bookId : BookIdInput
   ): Promise<Boolean>{
       try {
-        await this.bookRepository.delete(bookId.id)
-        return  true;
+       const result= await this.bookRepository.delete(bookId.id)
+       
+       if (result.affected===0)throw new Error ('Book does not exist');
+//affected muestra la cantidad de tablas q son afectadas
+       return  true;
       } catch (e) {
         throw new Error (e)
       }
